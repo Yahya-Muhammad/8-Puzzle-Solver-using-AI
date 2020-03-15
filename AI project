@@ -1,0 +1,166 @@
+import java.util.*;
+class Board {
+    int[][] board;
+    Board(int[][] b) {
+        board = b;
+    }
+    boolean isGoal() {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] != i * 3 + j)
+                        return false;
+        return true;
+    }
+    Queue<Board> neighbors() {
+        int row = 0;
+        int col = 0;
+        Queue<Board> neighbors = new LinkedList<Board>();
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] == 0) {
+                    row = i;
+                    col = j;
+                    break;
+                }
+        if (row != 0) {
+            int[][] neighbor = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+            exch(neighbor, row, col, row - 1, col);
+            neighbors.add(new Board(neighbor));
+        }
+        if (row != 2) {
+            int[][] neighbor = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+            exch(neighbor, row, col, row + 1, col);
+            neighbors.add(new Board(neighbor));
+        }
+        if (col != 0) {
+            int[][] neighbor = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+            exch(neighbor, row, col, row, col - 1);
+            neighbors.add(new Board(neighbor));
+        }
+        if (col != 2) {
+            int[][] neighbor = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+            exch(neighbor, row, col, row, col + 1);
+            neighbors.add(new Board(neighbor));
+        }
+        return neighbors;
+    }
+    void exch(int[][] board, int row, int col, int newRow, int newCol) {
+        int temp = board[row][col];
+        board[row][col] = board[newRow][newCol];
+        board[newRow][newCol] = temp;
+    }
+    public String toString() {
+        String s = "-----\n";
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++)
+                s += board[i][j] + " ";
+            s += '\n';
+        }
+        s += "-----\n";
+        return s;
+    }
+    boolean isSolvable() {
+        int count = 0;
+        List<Integer> array = new ArrayList<Integer>();
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                array.add(board[i][j]);
+        Integer[] anotherArray = new Integer[array.size()];
+        array.toArray(anotherArray);
+        for (int i = 0; i < anotherArray.length - 1; i++)
+            for (int j = i + 1; j < anotherArray.length; j++)
+                if (anotherArray[i] != 0 && anotherArray[j] != 0 && anotherArray[i] > anotherArray[j])
+                    count++;
+        return count % 2 == 0;
+    }
+    public boolean equals(Board state) {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (state.board[i][j] != this.board[i][j])
+                    return false;
+        return true;
+    }
+}
+public class Test {
+    static int BFS(Board initialState) {
+        Queue<Board> frontier = new LinkedList<Board>();
+        Queue<Board> explored = new LinkedList<Board>();
+        frontier.add(initialState);
+        int pathCost = -1;
+        while (!frontier.isEmpty()) {
+            Board state = frontier.remove();
+            explored.add(state);
+            System.out.println(state);
+            pathCost += 1;
+            if (state.isGoal())
+                return pathCost;
+            if (state.isSolvable()) {
+                Queue<Board> neighbors = state.neighbors();
+                while (!neighbors.isEmpty()) {
+                    Board neighbor = neighbors.remove();
+                    boolean add = true;
+                    for (Board item:frontier)
+                        if (item.equals(neighbor)) {
+                            add = false;
+                            break;
+                        }
+                    for (Board item:explored)
+                        if (item.equals(neighbor)) {
+                            add = false;
+                            break;
+                        }
+                    if (add)
+                        frontier.add(neighbor);
+                }
+            }
+        }
+        return -1;
+    }
+    static int DFS(Board initialState) {
+        Stack<Board> frontier = new Stack<Board>();
+        Queue<Board> explored = new LinkedList<Board>();
+        frontier.push(initialState);
+        int pathCost = -1;
+        while (!frontier.isEmpty()) {
+            Board state = frontier.pop();
+            explored.add(state);
+            System.out.println(state);
+            pathCost += 1;
+            if (state.isGoal())
+                return pathCost;
+            if (state.isSolvable()) {
+                Queue<Board> neighbors = state.neighbors();
+                while (!neighbors.isEmpty()) {
+                    Board neighbor = neighbors.remove();
+                    boolean add = true;
+                    for (Board item:frontier)
+                        if (item.equals(neighbor)) {
+                            add = false;
+                            break;
+                        }
+                    for (Board item:explored)
+                        if (item.equals(neighbor)) {
+                            add = false;
+                            break;
+                        }
+                    if (add)
+                        frontier.add(neighbor);
+                }
+            }
+        }
+        return -1;
+    }
+    public static void main(String[] args) {
+        int[][] puzzle = {{1, 2, 5}, {3, 4, 0}, {6, 7, 8}};
+        Board initialState = new Board(puzzle);
+        long start = System.currentTimeMillis();
+        System.out.println("BFS path cost: " + BFS(initialState));
+        long end = System.currentTimeMillis();
+        System.out.println("BFS runtime: " + (end - start) + " milliseconds");
+        System.out.println("-----------------");
+        start = System.currentTimeMillis();
+        System.out.println("DFS path cost: " + DFS(initialState));
+        end = System.currentTimeMillis();
+        System.out.println("DFS runtime: " + (end - start) + " milliseconds");
+    }
+}
