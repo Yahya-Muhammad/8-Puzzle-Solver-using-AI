@@ -1,0 +1,7 @@
+BFS path cost: 10
+BFS runtime: 35 milliseconds
+
+DFS path cost: 120491
+DFS runtime: 5095209 milliseconds
+
+- BFS was way more faster, cheaper, and efficient than the DFS.
