@@ -1,6 +1,3 @@
-8-puzzle AI project:
-
-
 I have implemented a class named “Board” that represents the 8-puzzle board, and I have implemented DFS and BFS methods in the driver class.
 
 
